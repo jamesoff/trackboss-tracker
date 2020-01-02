@@ -1,12 +1,25 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+  <div>
+    <div class="container-fluid">
+      <div class="row text-center">
+        <div class="col-xs-12 col-lg-4 col-lg-offset-4">
+        </div>
+
+        <router-view/>
+      </div>
     </div>
-    <router-view/>
   </div>
 </template>
+
+<script>
+
+import 'bootstrap/dist/css/bootstrap.css'
+
+export default {
+  name: 'app'
+}
+
+</script>
 
 <style>
 #app {

@@ -5,7 +5,8 @@ const express = require('express'),
     path = require('path'),
     bodyParser = require('body-parser'),
     mqtt = require('mqtt'),
-    mqttClient = mqtt.connect('mqtt://0.0.0.0:1883'),
+    // mqttClient = mqtt.connect('mqtt://0.0.0.0:1883'),
+    mqttClient = mqtt.connect('mqtt://raspberrypi.local:1883'),
     mqttTopic = 'TrackBossHRM',
     server = require('http').createServer(app),
     io = require('socket.io').listen(server);
@@ -13,9 +14,9 @@ const express = require('express'),
 var streamInterval;
 var msFrequency = 20;
 
-/* 
+/*
 Subscribe (listen) to MQTT topic and start publishing
-simulated data after successful MQTT connection 
+simulated data after successful MQTT connection
 */
 mqttClient.on('connect', () => {
     console.log('Mqtt connected.')
@@ -28,14 +29,14 @@ mqttClient.on('offline', () => {
     clearInterval(streamInterval);
 })
 
-/* 
+/*
 Message event fires, when new messages
 arrive on the subscribed topic
 */
 mqttClient.on('message', function (topic, message) {
-    // console.log('Received: ' + message.toString() + ' from topic: ' + topic.toString());
+    console.log('Received: ' + message.toString() + ' from topic: ' + topic.toString());
     let parsedMessage = JSON.parse(message);
-    io.emit('mqttTopic', parsedMessage);
+    io.emit(mqttTopic, parsedMessage);
 })
 
 io.on('connection', (client) => {
