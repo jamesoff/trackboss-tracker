@@ -19,7 +19,7 @@ class MyDelegate(btle.DefaultDelegate):
 
         global epoch_time
         epoch_time = time.localtime()
-        print("time: {} packet: {} Handle: {} HR (bpm): {}".format(time, packets, cHandle, data[1]))
+        print("epoch_time: {} packet: {} Handle: {} HR (bpm): {}".format(epoch_time, packets, cHandle, data[1]))
 
 parser = argparse.ArgumentParser(description="Connect to Polar H10 HRM")
 parser.add_argument('device', type=str, help='HRM strap device ID')
@@ -49,5 +49,7 @@ while True:
     if p.waitForNotifications(1.0):
         localtime = time.strftime('%Y-%m-%d %H:%M:%S', epoch_time)
         payload = json.dumps({'time': str(localtime), 'epoch': str(epoch_time), 'heart_rate': hr})
+        print("payload: {}".format(payload))
+
         client.publish(topic="TrackBossHRM", payload=str(payload), qos=0, retain=False)
         continue
