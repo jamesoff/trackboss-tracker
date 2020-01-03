@@ -1,4 +1,4 @@
-import datetime
+import time
 import bluepy.btle as btle
 import paho.mqtt.client as mqtt
 import argparse
@@ -17,8 +17,8 @@ class MyDelegate(btle.DefaultDelegate):
         global hr
         hr = str(data[1])
 
-        global time
-        time = datetime.datetime.now().time()
+        global epoch_time
+        epoch_time = time.localtime()
         print("time: {} packet: {} Handle: {} HR (bpm): {}".format(time, packets, cHandle, data[1]))
 
 parser = argparse.ArgumentParser(description="Connect to Polar H10 HRM")
@@ -47,6 +47,7 @@ client.connect(broker_url, broker_port)
 # listen for notifications
 while True:
     if p.waitForNotifications(1.0):
-        payload = json.dumps({'time': str(time), 'heart_rate': hr})
+        localtime = time.strftime('%Y-%m-%d %H:%M:%S', epoch_time)
+        payload = json.dumps({'time': str(localtime), 'epoch': str(epoch_time), 'heart_rate': hr})
         client.publish(topic="TrackBossHRM", payload=str(payload), qos=0, retain=False)
         continue
