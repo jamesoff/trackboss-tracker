@@ -6,6 +6,8 @@ import json
 
 packets = 0
 
+# TODO: Switch to logger rather than "print()"
+
 class MyDelegate(btle.DefaultDelegate):
     def __init__(self):
         btle.DefaultDelegate.__init__(self)
@@ -18,7 +20,7 @@ class MyDelegate(btle.DefaultDelegate):
         hr = str(data[1])
 
         global epoch_time
-        epoch_time = time.localtime()
+        epoch_time = time.time()
         print("epoch_time: {} packet: {} Handle: {} HR (bpm): {}".format(epoch_time, packets, cHandle, data[1]))
 
 parser = argparse.ArgumentParser(description="Connect to Polar H10 HRM")
@@ -47,7 +49,7 @@ client.connect(broker_url, broker_port)
 # listen for notifications
 while True:
     if p.waitForNotifications(1.0):
-        localtime = time.strftime('%Y-%m-%d %H:%M:%S', epoch_time)
+        localtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(epoch_time))
         payload = json.dumps({'time': str(localtime), 'epoch': str(epoch_time), 'heart_rate': hr})
         print("payload: {}".format(payload))
 
