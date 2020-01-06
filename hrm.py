@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import time
 import bluepy.btle as btle
 import paho.mqtt.client as mqtt
