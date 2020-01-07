@@ -3,9 +3,11 @@
     <div class="container-fluid">
       <div class="row text-center">
         <div class="col-xs-12 col-lg-4 col-lg-offset-4">
+          <img alt="DeepRacer logo" src="./assets/deepracer-logo.png" width="200">
         </div>
 
         <router-view/>
+
       </div>
     </div>
   </div>

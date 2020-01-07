@@ -1,6 +1,5 @@
 <template>
   <div class="home">
-    <img alt="DeepRacer logo" src="../assets/deepracer-logo.png" width="200">
     <Home/>
   </div>
 </template>

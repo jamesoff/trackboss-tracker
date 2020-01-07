@@ -2,30 +2,105 @@
   <div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
     <p>Status: {{connStatus}}</p>
     <p>Heart Rate: {{heartRateValue}} @ {{heartRateTime}}</p>
+    <p>{{message}}</p>
+    <!-- Panel div start -->
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">Heart Rate</h3>
+        <p>Trackboss Age: <input v-model="tbAge" placeholder=""></p>
+        <p>Trackboss Resting Heart Rate: <input v-model="tbRestingHR" placeholder=""></p>
+        <p><a @click="calculateHRZones">Update HR Zones</a></p>
+      </div>
+      <div class="panel-body">
+        <!-- Chart container -->
+        <div id="chart_container" >
+          <div id="y_axis"></div>
+          <div id="chart" ref="panel"></div>
+        </div>
+        <!-- End of chart container -->
+      </div>
+    </div>
+    <!-- Panel div end -->
+
   </div>
 </template>
 
 <script>
 
 import io from 'socket.io-client'
-// import Rickshaw from 'rickshaw'
+import Rickshaw from 'rickshaw'
+import moment from 'moment'
 import 'rickshaw/rickshaw.min.css'
 
 var socket = io.connect('http://localhost:3000')
+var hrmChart
 
 export default {
   name: 'home',
   data () {
     return {
       connStatus: 'Disconnected',
+      message: '',
       heartRateValue: '-',
-      heartRateTime: '-'
+      heartRateTime: '-',
+      timeInterval: 1000,
+      tbAge: 0,
+      tbRestingHR: 0,
+      tbFatHR: 0,
+      tbAerobicHR: 0,
+      tbMaxHR: 220
     }
   },
   mounted () {
+    this.initChart()
     this.openSocketListeners()
   },
   methods: {
+    initChart () {
+      hrmChart = new Rickshaw.Graph({
+        element: document.getElementById('chart'),
+        width: 900,
+        height: 500,
+        renderer: 'line',
+        min: 0,
+        max: 200,
+        series: new Rickshaw.Series.FixedDuration([{
+          name: 'hr', color: 'red'
+        }], undefined, {
+          timeInterval: this.timeInterval,
+          maxDataPoints: 100,
+          timeBase: new Date().getTime() / 1000
+        })
+      })
+
+      /* eslint-disable no-unused-vars */
+      var xAxis = new Rickshaw.Graph.Axis.X({
+        graph: hrmChart,
+        ticks: 5,
+        tickFormat: function (x) {
+          return moment(Date(x)).format('HH:mm:ss')
+        }
+      })
+      xAxis.render()
+
+      var yAxis = new Rickshaw.Graph.Axis.Y({
+        graph: hrmChart,
+        orientation: 'left',
+        element: document.getElementById('y_axis')
+      })
+      yAxis.render()
+
+      /* eslint-disable no-unused-vars */
+      // var hoverDetail = new Rickshaw.Graph.HoverDetail({
+      //   graph: hrmChart,
+      //   formatter: function (series, x, y) {
+      //     var date = '<span class="date">' + new Date(x * 1000).toUTCString() + '</span>'
+      //     var content = series.name + ': ' + parseInt(y) + '<br>' + date
+      //     return content
+      //   }
+      // })
+      // hrmChart.render()
+    },
     openSocketListeners () {
       socket.on('connect', () => {
         this.$log.debug('Socket status: Connected')
@@ -41,7 +116,31 @@ export default {
         this.$log.debug('Socket received (data): %o', data)
         this.heartRateValue = data.heart_rate
         this.heartRateTime = data.time
+
+        var graphData = { hr: this.heartRateValue }
+
+        hrmChart.series.addData(graphData)
+        // hrmChart.series[0] = ''
+        // this.$log.debug('series: %o', hrmChart.series[0])
+        hrmChart.render()
       })
+    },
+    calculateHRZones () {
+      this.$log.debug('here')
+      if ((this.tbAge > 18 && this.tbAge < 60) && (this.tbRestingHR > 40 && this.tbRestingHR < 100)) {
+        this.tbMaxHR = 220 - Number(this.tbAge)
+
+        var reserveHR = this.tbMaxHR - this.tbRestingHR
+        this.tbFatHR = Number(this.getPercentage(reserveHR, 50)) + Number(this.tbRestingHR)
+        this.tbAerobicHR = Number(this.getPercentage(reserveHR, 25)) + Number(this.tbRestingHR)
+
+        this.$log.debug('tbMaxHR: %s', this.tbMaxHR)
+        this.$log.debug('tbAerobicHR: %s', this.tbAerobicHR)
+        this.$log.debug('tbFatHR: %s', this.tbFatHR)
+      }
+    },
+    getPercentage (num, percent) {
+      return Math.floor(Number(num) - ((Number(percent) / 100) * Number(num)))
     }
   }
 }
@@ -49,5 +148,22 @@ export default {
 </script>
 
 <style scoped>
+#chart_container {
+    padding-right: 40px;
+    padding-bottom: 20px;
+    margin-top: 20px;
+    position: relative;
+}
 
+#chart {
+    position: relative;
+    left: 40px;
+}
+
+#y_axis {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+}
 </style>
