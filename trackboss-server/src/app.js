@@ -5,7 +5,6 @@ const express = require('express'),
     path = require('path'),
     bodyParser = require('body-parser'),
     mqtt = require('mqtt'),
-    // mqttClient = mqtt.connect('mqtt://0.0.0.0:1883'),
     mqttClient = mqtt.connect('mqtt://trackboss.local:1883'),
     mqttTopic = 'TrackBossHRM',
     server = require('http').createServer(app),
@@ -52,7 +51,7 @@ app.get('/', function (req, res) {
     res.send(
     [{
             title: "Hi, I'm the express server!",
-            description: "Start Moquette and the client application to see the action!"
+            description: "Start the client application to see heart rate data."
     }]
     )
 });
