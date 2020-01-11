@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
+import sys
 import time
 import bluepy.btle as btle
 import paho.mqtt.client as mqtt
 import argparse
 import json
+import subprocess
+import re
+
 
 packets = 0
-
-# TODO: Switch to logger rather than "print()"
 
 class MyDelegate(btle.DefaultDelegate):
     def __init__(self):
@@ -22,7 +24,7 @@ class MyDelegate(btle.DefaultDelegate):
 
         global epoch_time
         epoch_time = time.time()
-        print("epoch_time: {} packet: {} Handle: {} HR (bpm): {}".format(epoch_time, packets, cHandle, data[1]))
+        # print("epoch_time: {} packet: {} Handle: {} HR (bpm): {}".format(epoch_time, packets, cHandle, data[1]))
 
 parser = argparse.ArgumentParser(description="Connect to Polar H10 HRM")
 parser.add_argument('device', type=str, help='HRM strap device ID')
@@ -41,11 +43,14 @@ desc = ch.getDescriptors()[0]
 desc.write(b"\x01\x00", True)
 
 # MQTT
-broker_url = "10.10.10.71"
+broker_url = "localhost"
 broker_port = 1883
 
 client = mqtt.Client()
 client.connect(broker_url, broker_port)
+
+# Bluetooth Connection hack flag
+connection_flag = False
 
 # listen for notifications
 while True:
@@ -55,4 +60,22 @@ while True:
         print("payload: {}".format(payload))
 
         client.publish(topic="TrackBossHRM", payload=str(payload), qos=0, retain=False)
+
+        if connection_flag == False:
+            # Get the connection handle
+            output = subprocess.run(['hcitool', 'con'], capture_output=True)
+            connection_output = re.compile(r"(handle\s)(\d\d)").split(str(output.stdout))
+            connection_handle = connection_output[2]
+
+            # Run command to prevent bluetooth barfing
+            # sudo hcitool lecup --handle 64 --min 250 --max 400 --latency 0 --timeout 600
+            output = subprocess.run(['sudo', 'hcitool', 'lecup', '--handle', connection_handle, '--min', '250', '--max', '400', '--latency', '0', '--timeout', '600'], capture_output=True)
+
+        if output.check_returncode():
+            # Script will barf anyway
+            print('Error with amending the connection settings.')
+            sys.exit()
+        else:
+            connection_flag = True
+
         continue
