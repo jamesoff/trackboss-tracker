@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-import sys
-import time
-import bluepy.btle as btle
-import paho.mqtt.client as mqtt
 import argparse
 import json
-import subprocess
-import re
 import logging
+import re
+import subprocess
+import sys
+import time
+
+import bluepy.btle as btle
+import paho.mqtt.client as mqtt
 
 
 class MyDelegate(btle.DefaultDelegate):
