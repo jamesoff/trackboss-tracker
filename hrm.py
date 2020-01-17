@@ -113,7 +113,7 @@ while True:
 
             if output.returncode:
                 #  Script will barf anyway
-                print("Error with amending the connection settings.")
-                sys.exit()
+                logging.critical("Error with amending the connection settings.")
+                sys.exit(1)
             else:
                 connection_flag = True
