@@ -7,6 +7,7 @@ import argparse
 import json
 import subprocess
 import re
+import logging
 
 
 class MyDelegate(btle.DefaultDelegate):
@@ -20,14 +21,27 @@ class MyDelegate(btle.DefaultDelegate):
         self.packets += 1
         self.hr = str(data[1])
         self.epoch_time = time.time()
-        # print("epoch_time: {} packet: {} Handle: {} HR (bpm): {}".format(epoch_time, packets, cHandle, data[1]))
+        logging.debug(
+            "epoch_time: %f packet: %d Handle: %d HR (bpm): %s",
+            self.epoch_time,
+            self.packets,
+            cHandle,
+            self.hr,
+        )
 
 
+logger = logging.Logger("hrm")
 parser = argparse.ArgumentParser(description="Connect to Polar H10 HRM")
 parser.add_argument("device", type=str, help="HRM strap device ID")
+parser.add_argument(
+    "debug", action="store_true", default=False, help="enable debug logging"
+)
 
 args = parser.parse_args()
-print("args: {}".format(args.device))
+if args.debug:
+    logger.setLevel(logging.DEBUG)
+
+logger.debug("args: %s", args.device)
 
 p = btle.Peripheral(args.device, addrType="random")
 delegate = MyDelegate()
@@ -63,11 +77,11 @@ while True:
                 "heart_rate": delegate.hr,
             }
         )
-        print("payload: {}".format(payload))
+        logging.debug("payload: %s", payload)
 
         client.publish(topic="TrackBossHRM", payload=str(payload), qos=0, retain=False)
 
-        if connection_flag == False:
+        if not connection_flag:
             # Get the connection handle
             output = subprocess.run(["hcitool", "con"], capture_output=True)
             connection_output = re.compile(r"(handle\s)(\d\d)").split(
@@ -102,5 +116,3 @@ while True:
                 sys.exit()
             else:
                 connection_flag = True
-
-        continue
