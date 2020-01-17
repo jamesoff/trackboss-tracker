@@ -80,15 +80,27 @@ while True:
         )
         logging.debug("payload: %s", payload)
 
-        client.publish(topic="TrackBossHRM", payload=str(payload), qos=0, retain=False)
+        try:
+            client.publish(topic="TrackBossHRM", payload=payload, qos=0, retain=False)
+        except Exception:
+            logging.exception("Failed to publish message to MQTT")
 
         if not connection_flag:
             # Get the connection handle
-            output = subprocess.run(["hcitool", "con"], capture_output=True)
+            try:
+                output = subprocess.run(["hcitool", "con"], capture_output=True)
+            except Exception:
+                logging.exception("Failed to run hcitool con")
+                #  Bail since we can't continnue
+                sys.exit(1)
             connection_output = re.compile(r"(handle\s)(\d\d)").split(
                 str(output.stdout)
             )
-            connection_handle = connection_output[2]
+            try:
+                connection_handle = connection_output[2]
+            except IndexError:
+                logging.critical("Failed to parse hcitool con output")
+                sys.exit(1)
 
             # Run command to prevent bluetooth barfing
             # sudo hcitool lecup --handle 64 --min 250 --max 400 --latency 0 --timeout 600
