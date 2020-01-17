@@ -9,21 +9,17 @@ import subprocess
 import re
 
 
-packets = 0
-
 class MyDelegate(btle.DefaultDelegate):
     def __init__(self):
         btle.DefaultDelegate.__init__(self)
+        self.hr = None
+        self.epoch_time = None
+        self.packets = 0
 
     def handleNotification(self, cHandle, data):
-        global packets 
-        packets += 1
-
-        global hr
-        hr = str(data[1])
-
-        global epoch_time
-        epoch_time = time.time()
+        self.packets += 1
+        self.hr = str(data[1])
+        self.epoch_time = time.time()
         # print("epoch_time: {} packet: {} Handle: {} HR (bpm): {}".format(epoch_time, packets, cHandle, data[1]))
 
 parser = argparse.ArgumentParser(description="Connect to Polar H10 HRM")
@@ -33,7 +29,8 @@ args = parser.parse_args()
 print('args: {}'.format(args.device))
 
 p = btle.Peripheral(args.device, addrType="random")
-p.setDelegate(MyDelegate())
+delegate = MyDelegate()
+p.setDelegate(delegate)
 
 #start hr notification
 service_uuid = 0x180D
@@ -55,8 +52,8 @@ connection_flag = False
 # listen for notifications
 while True:
     if p.waitForNotifications(1.0):
-        localtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(epoch_time))
-        payload = json.dumps({'time': str(localtime), 'epoch': str(epoch_time), 'heart_rate': hr})
+        localtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(delegate.epoch_time))
+        payload = json.dumps({'time': str(localtime), 'epoch': str(delegate.epoch_time), 'heart_rate': delegate.hr})
         print("payload: {}".format(payload))
 
         client.publish(topic="TrackBossHRM", payload=str(payload), qos=0, retain=False)
