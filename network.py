@@ -10,10 +10,10 @@ font = ImageFont.truetype("./inkyphat/fonts/MesloLGS_NF_Regular.ttf", 10)
 fontsm = ImageFont.truetype("./inkyphat/fonts/MesloLGS_NF_Regular.ttf", 6)
 fontlg = ImageFont.truetype("./inkyphat/fonts/MesloLGS_NF_Regular.ttf", 16)
 
-inkyphat = InkyPHAT('red')
+inkyphat = InkyPHAT("red")
 
 inkyphat.set_rotation(180)
-inkyphat.set_colour('red')
+inkyphat.set_colour("red")
 inkyphat.set_border(inkyphat.BLACK)
 
 inkyphat.text((6, 77), host_name, inkyphat.WHITE, font=font)
