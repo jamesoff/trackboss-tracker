@@ -71,11 +71,11 @@ while True:
             # sudo hcitool lecup --handle 64 --min 250 --max 400 --latency 0 --timeout 600
             output = subprocess.run(['sudo', 'hcitool', 'lecup', '--handle', connection_handle, '--min', '250', '--max', '400', '--latency', '0', '--timeout', '600'], capture_output=True)
 
-        if output.check_returncode():
-            # Script will barf anyway
-            print('Error with amending the connection settings.')
-            sys.exit()
-        else:
-            connection_flag = True
+            if output.returncode:
+                # Script will barf anyway
+                print('Error with amending the connection settings.')
+                sys.exit()
+            else:
+                connection_flag = True
 
         continue
