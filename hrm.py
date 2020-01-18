@@ -23,18 +23,27 @@ class MyDelegate(btle.DefaultDelegate):
         # print("epoch_time: {} packet: {} Handle: {} HR (bpm): {}".format(epoch_time, packets, cHandle, data[1]))
 
 
-parser = argparse.ArgumentParser(description="Connect to Polar H10 HRM")
-parser.add_argument("device", type=str, help="HRM strap device ID")
+parser = argparse.ArgumentParser(description="Connect to Polar H10 HRM or RUN device")
+parser.add_argument("--device", "-d", type=str, help="Device ID", required=True)
+parser.add_argument("--type", "-t", type=str, help="HRM or RUN", default="HRM")
 
 args = parser.parse_args()
-print("args: {}".format(args.device))
+print("args.device: {}".format(args.device))
+print("args.type: {}".format(args.type))
 
 p = btle.Peripheral(args.device, addrType="random")
 delegate = MyDelegate()
 p.setDelegate(delegate)
 
 # start hr notification
-service_uuid = 0x180D
+if args.type.lower() == "run":
+    # TODO - Implement support for running data
+    service_uuid = 0x1814   # Running speed and cadence
+                            # https://www.bluetooth.com/wp-content/uploads/Sitecore-Media-Library/Gatt/Xml/Services/org.bluetooth.service.running_speed_and_cadence.xml
+else:
+    service_uuid = 0x180D   # Heart Rate
+                            # https://www.bluetooth.com/wp-content/uploads/Sitecore-Media-Library/Gatt/Xml/Services/org.bluetooth.service.heart_rate.xml
+
 svc = p.getServiceByUUID(service_uuid)
 ch = svc.getCharacteristics()[0]
 desc = ch.getDescriptors()[0]
