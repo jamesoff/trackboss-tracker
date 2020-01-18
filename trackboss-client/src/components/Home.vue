@@ -1,27 +1,37 @@
 <template>
-  <div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
-    <p>Status: {{connStatus}}</p>
-    <p>Heart Rate: {{heartRateValue}} @ {{heartRateTime}}</p>
-    <p>{{message}}</p>
-    <!-- Panel div start -->
-    <div class="panel panel-primary">
-      <div class="panel-heading">
-        <h3 class="panel-title">Heart Rate</h3>
-        <p>Trackboss Age: <input v-model="tbAge" placeholder=""></p>
-        <p>Trackboss Resting Heart Rate: <input v-model="tbRestingHR" placeholder=""></p>
-        <p><a @click="calculateHRZones">Update HR Zones</a></p>
-      </div>
-      <div class="panel-body">
-        <!-- Chart container -->
-        <div id="chart_container" >
-          <div id="y_axis"></div>
-          <div id="chart" ref="panel"></div>
+  <div class="row text-center">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+      <!-- Panel div start -->
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h1>Trackboss Tracker</h1>
         </div>
-        <!-- End of chart container -->
+        <div class="panel-body">
+          <!-- Chart container -->
+          <div id="chart_container" >
+            <div id="y_axis"></div>
+            <div id="chart" ref="panel"></div>
+          </div>
+          <!-- End of chart container -->
+        </div>
       </div>
+      <!-- Panel div end -->
     </div>
-    <!-- Panel div end -->
-
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+      <img alt="DeepRacer logo" src="../assets/deepracer-logo.png" width="200">
+      <p>Status: {{connStatus}}</p>
+      <!-- <p>{{message}}</p>
+      <h3>Trackboss info</h3>
+      <p>Trackboss Age: <input v-model="tbAge" placeholder=""></p>
+      <p>Trackboss Resting Heart Rate: <input v-model="tbRestingHR" placeholder=""></p>
+      <p><a @click="calculateHRZones">Update HR Zones</a></p> -->
+      <!-- <h3>Trackboss HR zones</h3> -->
+      <h1>Current HR: {{heartRateValue}}</h1>
+      <p>@ {{heartRateTime}}</p>
+      <!-- <p>Max HR: {{tbMaxHR}}</p>
+      <p>Aerobic Threshold: {{tbAerobicHR}}</p>
+      <p>Fat burning threshold: {{tbFatHR}}</p> -->
+    </div>
   </div>
 </template>
 
@@ -54,13 +64,14 @@ export default {
   mounted () {
     this.initChart()
     this.openSocketListeners()
+    this.colorPalette()
   },
   methods: {
     initChart () {
       hrmChart = new Rickshaw.Graph({
         element: document.getElementById('chart'),
         width: 900,
-        height: 500,
+        height: 1200,
         renderer: 'line',
         min: 0,
         max: 200,
@@ -76,7 +87,7 @@ export default {
       /* eslint-disable no-unused-vars */
       var xAxis = new Rickshaw.Graph.Axis.X({
         graph: hrmChart,
-        ticks: 5,
+        ticks: 9,
         tickFormat: function (x) {
           return moment(Date(x)).format('HH:mm:ss')
         }
@@ -141,6 +152,9 @@ export default {
     },
     getPercentage (num, percent) {
       return Math.floor(Number(num) - ((Number(percent) / 100) * Number(num)))
+    },
+    colorPalette () {
+      this.$log.debug('screen: %s', this.$route.query.screen)
     }
   }
 }
@@ -148,16 +162,17 @@ export default {
 </script>
 
 <style scoped>
+
 #chart_container {
-    padding-right: 40px;
-    padding-bottom: 20px;
-    margin-top: 20px;
-    position: relative;
+  padding-right: 40px;
+  padding-bottom: 20px;
+  margin-top: 20px;
+  position: relative;
 }
 
 #chart {
-    position: relative;
-    left: 40px;
+  position: relative;
+  left: 40px;
 }
 
 #y_axis {
@@ -166,4 +181,17 @@ export default {
   bottom: 0;
   width: 40px;
 }
+
+h1 {
+  font-size: 48pt;
+}
+
+/* .rickshaw_graph .y_ticks text {
+   fill: #fff;
+}
+
+.rickshaw_graph .x_tick .title {
+   color: #fff;
+} */
+
 </style>

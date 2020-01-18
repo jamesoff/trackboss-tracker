@@ -1,21 +1,12 @@
 <template>
   <div>
     <div class="container-fluid">
-      <div class="row text-center">
-        <div class="col-xs-12 col-lg-4 col-lg-offset-4">
-          <img alt="DeepRacer logo" src="./assets/deepracer-logo.png" width="200">
-        </div>
-
-        <router-view/>
-
-      </div>
+      <router-view/>
     </div>
   </div>
 </template>
 
 <script>
-
-import 'bootstrap/dist/css/bootstrap.css'
 
 export default {
   name: 'app'
@@ -24,24 +15,5 @@ export default {
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
 
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
 </style>
