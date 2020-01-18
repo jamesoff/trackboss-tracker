@@ -49,3 +49,11 @@ To run using data from the MQTT queue (live HR data)
 To run using data from the MQTT queue (live HR data)
 
     $ npm run serve
+
+## Data Flow / Application Structure
+
+Currently the application is run using a Raspberry Pi for `hrm.py` to connect to the Polar chest strap with trckboss-* running (and therefore) tested on an OSX based device.
+
+    hrm.py |    |  trackboss-server  |    |  trackboss-client
+           | => |                    | => |
+    (mqtt) |    | socket.io (server) |    | socket.io (client)
