@@ -19,7 +19,7 @@ class MyDelegate(btle.DefaultDelegate):
     def handleNotification(self, cHandle, data):
         self.packets += 1
         self.hr = str(data[1])
-        self.epoch_time = time.time()
+        self.epoch_time = int(time.time())
         # print("epoch_time: {} packet: {} Handle: {} HR (bpm): {}".format(epoch_time, packets, cHandle, data[1]))
 
 
